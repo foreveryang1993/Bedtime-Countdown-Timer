@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Bedtime_Countdown_Timer.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="user_setting_time_bedtime" Type="System.String" Scope="User">
+      <Value Profile="(Default)">01:00:00</Value>
+    </Setting>
+    <Setting Name="user_setting_time_duration" Type="System.String" Scope="User">
+      <Value Profile="(Default)">07:30:00</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
