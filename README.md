@@ -6,7 +6,7 @@ Bedtime Countdown Timer is a countdown timer for reminding the bedtime. User wil
 
 ## Screenshots
 
-![](https://imgur.com/Mk2UXxz)
+[Imgur](https://imgur.com/Mk2UXxz)
 
 
 
