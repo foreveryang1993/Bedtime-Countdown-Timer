@@ -41,7 +41,7 @@ namespace Bedtime_Countdown_Timer
         public static bool flag_time_up = false;
         public static bool flag_30min_remaining = false;
 
-        OperatingSystem os_version;
+        OperatingSystem os_version = System.Environment.OSVersion;
 
         public Form_Main()
         {
@@ -66,8 +66,6 @@ namespace Bedtime_Countdown_Timer
             textbox_bedtime.ReadOnly = true;
             textbox_duration.ReadOnly = true;
             textbox_wake_up.ReadOnly = true;
-
-            os_version = System.Environment.OSVersion;
 
             /*
             //Notification Test
