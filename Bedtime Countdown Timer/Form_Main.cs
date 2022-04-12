@@ -3,12 +3,17 @@ namespace Bedtime_Countdown_Timer
     using Windows.UI.Notifications;
     using Microsoft.Toolkit.Uwp.Notifications;
 
+    enum Notification : int
+    {
+        Test,
+        Start,
+        One_hour,
+        Thirty_min,
+        Time_up
+    }
+
     public partial class Form_Main : Form
     {
-        public const int NOTIFICATION_TEST = 0;
-        public const int NOTIFICATION_START = 1;
-        public const int NOTIFICATION_30MIN = 2;
-        public const int NOTIFICATION_TIME_UP = 3;
 
         public static DateTime time_now_datetime = DateTime.Now;
         public static TimeOnly time_now_timeonly = new TimeOnly(00, 00, 00);
@@ -25,7 +30,8 @@ namespace Bedtime_Countdown_Timer
 
         public static TimeOnly time_const_zero_timeonly = new TimeOnly(00, 00, 00);
         public static TimeOnly time_const_one_sec_timeonly = new TimeOnly(00, 00, 01);
-        public static TimeOnly time_const_30min_timeonly = new TimeOnly(00, 30, 00);
+        public static TimeOnly time_const_thirty_min_timeonly = new TimeOnly(00, 30, 00);
+        public static TimeOnly time_const_one_hour_timeonly = new TimeOnly(01, 00, 00);
         public static TimeSpan time_const_24_hr_timespan = new TimeSpan(24, 00, 00);
 
         public static string time_formats_timeonly = "r";
@@ -38,8 +44,10 @@ namespace Bedtime_Countdown_Timer
 
         public static bool flag_timer_trigger_enable = true;
 
+        public static bool flag_thirty_min_remaining = false;
+        public static bool flag_one_hour_remaining = false;
         public static bool flag_time_up = false;
-        public static bool flag_30min_remaining = false;
+        
 
         OperatingSystem os_version = System.Environment.OSVersion;
 
@@ -47,25 +55,14 @@ namespace Bedtime_Countdown_Timer
         {
             InitializeComponent();
 
-
             button_pause.Text = "Pause";
 
             textbox_bedtime.Text = Properties.Settings.Default.user_setting_time_bedtime;
             textbox_duration.Text = Properties.Settings.Default.user_setting_time_duration;
 
-            TimeOnly.TryParse(textbox_bedtime.Text, out time_bedtime_timeonly);
-            TimeOnly.TryParse(textbox_duration.Text, out time_duration_timeonly);
 
-            time_wake_up_timeonly = TimeOnly.FromTimeSpan(time_bedtime_timeonly.ToTimeSpan() + time_duration_timeonly.ToTimeSpan());
 
-            textbox_wake_up.Text = time_wake_up_timeonly.ToString(time_formats_timeonly);
-
-            flag_time_up = false;
-            flag_30min_remaining = false;
-
-            textbox_bedtime.ReadOnly = true;
-            textbox_duration.ReadOnly = true;
-            textbox_wake_up.ReadOnly = true;
+            Initialize();
 
             /*
             //Notification Test
@@ -112,14 +109,36 @@ namespace Bedtime_Countdown_Timer
                 }
                 */
 
-                if ((flag_30min_remaining == false) && (time_remaining_timeonly == time_const_30min_timeonly))
+                if ((flag_one_hour_remaining == false) && (time_remaining_timeonly == time_const_one_hour_timeonly))
                 {
-                    flag_30min_remaining = true;
+                    flag_one_hour_remaining = true;
                     if (checkbox_remind.Checked == true)
                     {
                         if (os_version.Version.Major >= 10)
                         {
-                            Toast_Notification(NOTIFICATION_30MIN);
+                            Toast_Notification(Notification.One_hour);
+                        }
+                        else
+                        {
+                            MessageBox.Show("1 hour remaining!!");
+                        }
+                    }
+                }
+                else if ((flag_one_hour_remaining == true) && (time_remaining_timeonly <= TimeOnly.FromTimeSpan(time_const_one_hour_timeonly - time_const_one_sec_timeonly)))
+                {
+                    flag_one_hour_remaining = false;
+                }
+
+
+
+                if ((flag_thirty_min_remaining == false) && (time_remaining_timeonly == time_const_thirty_min_timeonly))
+                {
+                    flag_thirty_min_remaining = true;
+                    if (checkbox_remind.Checked == true)
+                    {
+                        if (os_version.Version.Major >= 10)
+                        {
+                            Toast_Notification(Notification.Thirty_min);
                         }
                         else
                         {
@@ -127,9 +146,9 @@ namespace Bedtime_Countdown_Timer
                         }
                     }
                 }
-                else if ((flag_30min_remaining == true) && (time_remaining_timeonly <= TimeOnly.FromTimeSpan(time_const_30min_timeonly - time_const_one_sec_timeonly)))
+                else if ((flag_thirty_min_remaining == true) && (time_remaining_timeonly <= TimeOnly.FromTimeSpan(time_const_thirty_min_timeonly - time_const_one_sec_timeonly)))
                 {
-                    flag_30min_remaining = false;
+                    flag_thirty_min_remaining = false;
                 }
 
 
@@ -141,7 +160,7 @@ namespace Bedtime_Countdown_Timer
                     {
                         if (os_version.Version.Major >= 10)
                         {
-                            Toast_Notification(NOTIFICATION_TIME_UP);
+                            Toast_Notification(Notification.Time_up);
                         }
                         else
                         {
@@ -240,7 +259,7 @@ namespace Bedtime_Countdown_Timer
             {
                 if (os_version.Version.Major >= 10)
                 {
-                    Toast_Notification(NOTIFICATION_START);
+                    Toast_Notification(Notification.Start);
                 }
             }
             else
@@ -265,9 +284,7 @@ namespace Bedtime_Countdown_Timer
                 flag_timer_trigger_enable = true;
                 button_pause.Text = "Pause";
 
-                textbox_bedtime.ReadOnly = true;
-                textbox_duration.ReadOnly = true;
-                textbox_wake_up.ReadOnly = true;
+                Initialize();
 
                 User_Property_Save();
             }
@@ -310,7 +327,7 @@ namespace Bedtime_Countdown_Timer
             button_pause.Focus();
         }
 
-        private void Toast_Notification(int notification_type)
+        private void Toast_Notification(Notification notification_type)
         {
             int conversationId = 384928;
 
@@ -318,7 +335,7 @@ namespace Bedtime_Countdown_Timer
 
             switch (notification_type)
             {
-                case NOTIFICATION_TEST:
+                case Notification.Test:
                     new ToastContentBuilder()
                         .AddArgument("conversationId", conversationId)
                         //.AddText("OS Version: " + os_version.ToString())
@@ -328,7 +345,7 @@ namespace Bedtime_Countdown_Timer
 
                         .Show();
                     break;
-                case NOTIFICATION_START:
+                case Notification.Start:
                     new ToastContentBuilder()
                         .AddArgument("conversationId", conversationId)
                         .AddText("Start")
@@ -337,8 +354,22 @@ namespace Bedtime_Countdown_Timer
 
                         .Show();
                     break;
+                
+                case Notification.One_hour:
+                    new ToastContentBuilder()
+                        .AddArgument("conversationId", conversationId)
+                        .AddText("1 hour remaining!!")
 
-                case NOTIFICATION_30MIN:
+                        .AddButton(new ToastButton()
+                        .SetContent("Dismiss")
+                        )
+
+                        .SetToastScenario(ToastScenario.Reminder)
+
+                        .Show();
+                    break;
+
+                case Notification.Thirty_min:
                     new ToastContentBuilder()
                         .AddArgument("conversationId", conversationId)
                         .AddText("30 minutes remaining!!")
@@ -352,7 +383,7 @@ namespace Bedtime_Countdown_Timer
                         .Show();
                     break;
 
-                case NOTIFICATION_TIME_UP:
+                case Notification.Time_up:
                     new ToastContentBuilder()
                         .AddArgument("conversationId", conversationId)
                         .AddText("Time's up!!")
@@ -370,6 +401,25 @@ namespace Bedtime_Countdown_Timer
                 default:
                     break;
             }
+        }
+
+
+        private void Initialize()
+        {
+            textbox_bedtime.ReadOnly = true;
+            textbox_duration.ReadOnly = true;
+            textbox_wake_up.ReadOnly = true;
+
+            TimeOnly.TryParse(textbox_bedtime.Text, out time_bedtime_timeonly);
+            TimeOnly.TryParse(textbox_duration.Text, out time_duration_timeonly);
+
+            time_wake_up_timeonly = TimeOnly.FromTimeSpan(time_bedtime_timeonly.ToTimeSpan() + time_duration_timeonly.ToTimeSpan());
+
+            textbox_wake_up.Text = time_wake_up_timeonly.ToString(time_formats_timeonly);
+
+            flag_time_up = false;
+            flag_thirty_min_remaining = false;
+            flag_one_hour_remaining = false;
         }
     }
 }
